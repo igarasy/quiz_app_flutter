@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_app_flutter/data/questions.dart';
 import 'package:quiz_app_flutter/questions_screen.dart';
 import 'package:quiz_app_flutter/start_screen.dart';
 
 class Quiz extends StatefulWidget {
   const Quiz({super.key});
+
   @override
   State<Quiz> createState() {
     return _QuizState();
@@ -11,23 +13,36 @@ class Quiz extends StatefulWidget {
 }
 
 class _QuizState extends State<Quiz> {
-  Widget? activeScreen;
-
-  @override
-  void initState() {
-    //we have to use this function because when the widget is loaded, the switchScreen function its not in memory, with this we can pass the function in the initial state of widget
-    activeScreen = StartScreen(switchScreen);
-    super.initState();
-  }
+  List<String> selectedAnswers = [];
+  var activeScreen = 'start-screen';
 
   void switchScreen() {
     setState(() {
-      activeScreen = const QuestionsScreen();
+      activeScreen = 'questions-screen';
     });
+  }
+
+  void chooseAnswer(String answer) {
+    selectedAnswers.add(answer);
+
+    if (selectedAnswers.length == questions.length) {
+      setState(() {
+        selectedAnswers = [];
+        activeScreen = 'start-screen';
+      });
+    }
   }
 
   @override
   Widget build(context) {
+    Widget screenWidget = StartScreen(switchScreen);
+
+    if (activeScreen == 'questions-screen') {
+      screenWidget = QuestionsScreen(
+        onSelectAnswer: chooseAnswer,
+      );
+    }
+
     return MaterialApp(
       home: Scaffold(
         body: Container(
@@ -41,7 +56,7 @@ class _QuizState extends State<Quiz> {
               end: Alignment.bottomRight,
             ),
           ),
-          child: activeScreen,
+          child: screenWidget,
         ),
       ),
     );
